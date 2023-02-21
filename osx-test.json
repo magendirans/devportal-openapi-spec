@@ -1,0 +1,829 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Energy and Sustainability Scoring",
+    "description": "# Overview\n\nEcoStruxure™ Energy and Sustainability Scoring API allows Building Certification Providers to collect, manage and benchmark buildings measurement data in order to deliver energy and sustainability performance scoring to their customers.\n\n## API overview and usage\n\nThis API enables the following operations:\n\n\n**Sites metadata**\n- Retrieve all sites belonging to which the connected user has access, along site metadata needed for certification scores calculation (e.g. gross area, building occupants, operating hours, etc)\n\n\n**Meters and measurement types**\n- Retrieve all meters installed at a given site, including the list of measurements and units they support\n\n**Sites registration**\n- Allows the Certification Provider, to register a site by providing the Certification metadata details and thus starting automatically a data pipeline to collect all timeseries related information\n\n**Time series**\n- Retrieve all timeseries for any given site and for an arbitrary time period\n- Room comfort data: zone temperature, humidity, CO2\n- Energy consumption: active energy (kWh), reactive energy (kVar)- \n\n**Certification Scores**\n* Provide Certification Scores for a given site and read current and historical scores\n* Supported Types: Daily, Monthly, Average, Local Average \n* Supported Categories: Energy, Water, Waste, Transportation, Human Experience, Re-Entry\n\n\n## How it works\n\nA user (Schneider Electric customer) creates an account on a Certification Provider platform. On the platform, the user has the possibility to connect/authorize access to Schneider Electric data.\nIf the user selects this option, they will be redirected to Schneider Electric Ecostruxure Consent Management Portal which will authenticate the user and ask them to give consent to the Certification Provider to access specific data required by the service.\n\nAfter the consent is given, the Certification Platform will display all Sites data in the scope of a customer, allowing the user to select for which sites they wish to enable Energy and Sustainability Scoring.\nOnce the setup is complete, the Certification Provider will retrieve meters details deployed at each of the sites and will also retrieve timeseries measurements for all meters for the past year in order to calculate the initial scoring.\nFrom then on and on following days, the Certification Provider will only need to retrieve daily incremental timeseries measurements\n\nOnce a score for a site is calculated in any of the supported categories, the score will also be shared with Schneider Electric, so that scores can also be shared and accessed by any SE Platform\n\n![High-level flow diagram](https://raw.githubusercontent.com/eduard-dominguez-se/ecostruxure-openness/main/energy-sustainability-scoring/public-images/how-it-works.png \"High-level flow diagram\")\n\n\n# Documentation\n    \n## How to sign up for the API\n    \nBefore you can sign up for the `Energy and Sustainability Scoring` API, you must [register or login with an Exchange account](https://exchange.se.com).\nThen you can subscribe to the [API product in our Shop](https://exchange.se.com) and you can read about Terms & Conditions. After subscription, you will receive further information on how to access the API including the API Key.\n\nStatus of your API consumption will soon be available from the [Exchange cockpit](https://exchange.se.com)\n\n## Authentication guide\n\nThis API supports the following authentication mechanism:\n\n* **OAuth2 Authorization Code Flow**\n \n  Once subscription to the API has been approved in [Exchange] (https://exchange.se.com), API Subscription Client ID and Client Secret will be shared with the subscriber\n \n  The Client ID should be sent when calling the Authorize Endpoint to initiate the Authorization and Consent flow.\n  <br/><br/>\n  Once user consents to the scopes requested by the client app, an authorization code will be issued which needs to be sent to the Token endpoint with grant_type refresh_token, along with the Client Secret in order to retrieve a refresh_token and an access_token\n  In order to issue a new access_token, a call to the Token endpoint needs to be made with grant_type refresh_token, and by sending the refresh_token\n  <br/><br/>\n  Each access_token is valid for 1 hour and has to be provided to every API call in the form of HTTP Header `Authorization: Bearer {access_token}` \n\n\n![Authorization Code Flow diagram](https://raw.githubusercontent.com/eduard-dominguez-se/ecostruxure-openness/main/energy-sustainability-scoring/public-images/authorization_flow.png \"Authorization Code Flow diagram\")\n\n## Operations and Resource Model\n\nThe following diagram shows a high-level view of all operations and resources which are part of this API\n![Operations and Resource Model diagram](https://raw.githubusercontent.com/eduard-dominguez-se/ecostruxure-openness/main/energy-sustainability-scoring/public-images/open-esx-energy-scoring.diagram.png \"Operations and Resource Model diagram\")\n\n## Samples\n\n* ### [Postman collection](https://raw.githubusercontent.com/eduard-dominguez-se/ecostruxure-openness/main/energy-sustainability-scoring/samples/postman/Energy%20and%20Sustainability%20Scoring%20API.postman_collection.json)\n\n\n\n## Support\n\nContact the Exchange support team at exchange.support@se.com.\n\nIn your request please :\n\n    - mention the involved endpoint\n    - give the request that generate the error\n    - copy past any error message you received\n    - add some screen shot\n\n\n---",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://se-exchange-uat-sandbox.apigee.net/ecostruxure/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Site",
+      "description": "Everything about your sites where Compatible EcoStruxure offers are deployed."
+    },
+    {
+      "name": "Meter",
+      "description": "Everything about your compatible EcoStruxure installed meters."
+    },
+    {
+      "name": "Timeseries",
+      "description": "Retrieve the timeseries metrics for a given site and time range."
+    },
+    {
+      "name": "Certification",
+      "description": "Everything about your energy and sustainability scores."
+    }
+  ],
+  "paths": {
+    "/sites": {
+      "get": {
+        "summary": "Get Sites",
+        "description": "Retrieve all sites and related metadata",
+        "operationId": "listSites",
+        "tags": [
+          "Site"
+        ],
+        "responses": {
+          "200": {
+            "description": "Found Sites",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Site"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2AuthCode": [
+              "read:site"
+            ]
+          }, 
+		  {
+            "personal-access-token": [
+              "read:site"
+            ]
+          }
+        ]
+      }
+    },
+    "/sites/{site-id}/certification-providers": {
+      "post": {
+        "summary": "Creates a Certification Provider association on a Site",
+        "description": "Creates a Certification Provider resource to associate a site by providing the Certification metadata details and thus starting automatically a data pipeline to collect all timeseries related information",
+        "operationId": "createEnergyCertification",
+        "tags": [
+          "Certification"
+        ],
+        "parameters": [
+          {
+            "name": "site-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 623
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Certification Provider resource to be created",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertificationProvider"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successfully Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CertificationProvider"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Site Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2AuthCode": [
+              "write:energy-score"
+            ]
+          }
+        ]
+      }
+    },
+    "/sites/{site-id}/certification-scores": {
+      "get": {
+        "summary": "Get Certification Scores for a Site",
+        "description": "Retrieve all Certification Scores for a given site",
+        "operationId": "listCertificationScores",
+        "tags": [
+          "Certification"
+        ],
+        "parameters": [
+          {
+            "name": "site-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 623
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "daily",
+                  "monthly",
+                  "localAverage",
+                  "average"
+                ],
+                "example": "daily"
+              }
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "energy"
+                ],
+                "example": "energy"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Found Scores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CertificationScore"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Site Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2AuthCode": [
+              "read:energy-score"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create Certification Scores for a Site",
+        "description": "Creates Certification Scores for a given site. Supports multiple categories (e.g. energy) and types (e.g. monthly)",
+        "operationId": "createCertificationScores",
+        "tags": [
+          "Certification"
+        ],
+        "parameters": [
+          {
+            "name": "site-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 623
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Certification Score resource to be created",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CertificationScore"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successfully Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CertificationScore"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Site Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2AuthCode": [
+              "write:energy-score"
+            ]
+          }
+        ]
+      }
+    },
+    "/sites/{site-id}/meters": {
+      "get": {
+        "summary": "Get Meters in a Site",
+        "description": "Retrieve all meters installed at a given site",
+        "operationId": "listMeters",
+        "tags": [
+          "Meter"
+        ],
+        "parameters": [
+          {
+            "name": "site-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 623
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Found Meters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Meter"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Site Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2AuthCode": [
+              "read:energy-performance"
+            ]
+          }
+        ]
+      }
+    },
+    "/sites/{site-id}/timeseries": {
+      "get": {
+        "summary": "Get Timeseries for a Site",
+        "description": "Retrieve all timeseries metrics for a given site and time range",
+        "operationId": "listMetrics",
+        "tags": [
+          "Timeseries"
+        ],
+        "parameters": [
+          {
+            "name": "site-id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": 623
+            }
+          },
+          {
+            "name": "updatedAt[gte]",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "updatedAt[lt]",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Found Timeseries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Timeserie"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Site Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2AuthCode": [
+              "read:energy-performance"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Oauth2AuthCode": {
+        "type": "oauth2",
+        "description": "OAuth2 Authorization flow",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://se-exchange-uat-sandbox.apigee.net/ecostruxure/v1/oauth/authorize",
+            "tokenUrl": "https://se-exchange-uat-sandbox.apigee.net/ecostruxure/v1/oauth/token",
+            "refreshUrl": "https://se-exchange-uat-sandbox.apigee.net/ecostruxure/v1/oauth/token",
+            "scopes": {
+              "read:site": "Read access to your site details",
+              "read:energy-performance": "Read access to your site energy performance details",
+              "write:energy-score": "Update access to your site energy score",
+              "read:energy-score": "Read access to your site energy score",
+              "read:asset": "Read asset information",
+              "offline_access": "Perform offline operations on behalf of the user"
+            }
+          }
+        }
+      }, 
+	  "personal-access-token": {
+        "type": "http",
+        "description": "Personal access token based authentication and authorization.",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "Address": {
+        "type": "object",
+        "title": "Address",
+        "properties": {
+          "address": {
+            "type": "string",
+            "example": "173 exford road"
+          },
+          "city": {
+            "type": "string",
+            "example": "Melton South"
+          },
+          "countryIsoCode": {
+            "type": "string",
+            "example": "AU"
+          },
+          "zipCode": {
+            "type": "string",
+            "example": 3338
+          },
+          "stateProvince": {
+            "type": "string",
+            "example": "AZ"
+          },
+          "timezone": {
+            "type": "string",
+            "example": null
+          },
+          "coordinates": {
+            "type": "object",
+            "title": "Coordinates",
+            "properties": {
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              },
+              "elevation": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "Site": {
+        "type": "object",
+        "title": "Site",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "fc64ac6a-abfd-4f5e-9d38-81101152c0ca"
+          },
+          "name": {
+            "type": "string",
+            "example": "Mcdonald's Melton South"
+          },
+          "type": {
+            "type": "string",
+            "example": "Retail"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "grossArea": {
+                "type": "integer",
+                "example": 425
+              },
+              "buildingOccupants": {
+                "type": "integer",
+                "example": 49
+              },
+              "daysPerWeekWithVisitors": {
+                "type": "integer",
+                "example": 7
+              },
+              "numberOfVisitorsPerDay": {
+                "type": "integer",
+                "example": 548
+              },
+              "visitDuration": {
+                "type": "number",
+                "format": "double",
+                "example": 0.0208
+              },
+              "weeklyOperatingHours": {
+                "type": "integer",
+                "example": 168
+              }
+            }
+          },
+          "postalAddress": {
+            "$ref": "#/components/schemas/Address"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "title": "Error",
+        "description": "Error occurred while handling the request (based on rfc7807)",
+        "properties": {
+          "type": {
+            "description": "A URI reference [RFC3986] that identifies the problem type.",
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the problem type.",
+            "type": "string"
+          },
+          "status": {
+            "description": "The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.",
+            "type": "number"
+          },
+          "instance": {
+            "description": "A URI reference that identifies the specific occurrence of the problem.",
+            "type": "string"
+          },
+          "detail": {
+            "description": "A human-readable explanation specific to this occurrence of the problem.",
+            "type": "string"
+          },
+          "debugging": {
+            "description": "Debugging information for DEV and QA environments.",
+            "type": "string"
+          },
+          "invalid-params": {
+            "description": "An array of validation errors.",
+            "type": "array",
+            "items": {
+              "description": "The validation error descriptor.",
+              "type": "object",
+              "required": [
+                "path",
+                "name",
+                "reason"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "CertificationProvider": {
+        "type": "object",
+        "title": "Certification Provider",
+        "properties": {
+          "leedId": {
+            "type": "integer",
+            "format": "int64",
+            "example": 8000015697,
+            "readOnly": true
+          },
+          "leedName": {
+            "type": "string",
+            "example": "Mcdonald's Melton South"
+          }
+        },
+        "required": [
+          "leedId",
+          "leedName"
+        ]
+      },
+      "CertificationScore": {
+        "type": "object",
+        "title": "Certification Score",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "score": {
+            "type": "number",
+            "example": 94.99
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "monthly",
+              "localAverage",
+              "average"
+            ],
+            "example": "daily"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "energy",
+              "water",
+              "waste",
+              "transportation",
+              "humanExperience",
+              "reEntry"
+            ],
+            "example": "energy"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "date",
+          "score",
+          "type",
+          "category"
+        ]
+      },
+      "Measurement": {
+        "type": "object",
+        "title": "Measurement",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "timeseries": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "Meter": {
+        "type": "object",
+        "title": "Meter",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "5e7a8353-2520-489c-bf68-1895d0ea8f24"
+          },
+          "name": {
+            "type": "string",
+            "example": "Solar"
+          },
+          "gatewayId": {
+            "type": "string"
+          },
+          "commodity": {
+            "type": "string",
+            "example": "Electricity"
+          },
+          "usage": {
+            "type": "string",
+            "example": "MainMeter"
+          },
+          "measurements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Measurement"
+            }
+          }
+        }
+      },
+      "Timeserie": {
+        "type": "object",
+        "title": "Timeserie",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "43b68619-7681-4458-bbd6-c4e38a0b202a"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "value": {
+                  "type": "number",
+                  "example": 992000
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

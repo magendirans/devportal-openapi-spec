@@ -1,0 +1,13 @@
+{
+    "name": "New API through GitHub",
+    "openAPISpecificationFileType": "yaml",
+    "productNameinApigee": "",
+    "productIDinAppdirect": "",
+    "subscribeURL": "",
+    "contactUsLabel": "Contact Us",
+    "contactUsButtonLabel": "Click",
+    "contactUsButtonURL": "https://exchange.se.com/",
+    "manageSubscriptionURL": "",
+    "urlAlias": "github_api",
+    "isNewFlag": "TRUE"
+}

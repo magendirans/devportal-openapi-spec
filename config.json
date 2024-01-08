@@ -4,11 +4,11 @@
     "codeSampleSpecification": "https://raw.githubusercontent.com/magendirans/devportal-openapi-spec/main/codeSample.html",
     "productNameinApigee": "",
     "productIDinAppdirect": "",
-    "subscribeURL": "",
+    "subscribeURL": "https://exchange.se.com/",
     "contactUsLabel": "Contact Us",
     "contactUsButtonLabel": "Click",
     "contactUsButtonURL": "https://exchange.se.com/",
-    "manageSubscriptionURL": "",
+    "manageSubscriptionURL": "https://exchange.se.com/",
     "urlAlias": "github_api",
     "isNewFlag": "TRUE"
 }

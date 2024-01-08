@@ -10,5 +10,5 @@
     "contactUsButtonURL": "https://exchange.se.com/",
     "manageSubscriptionURL": "",
     "urlAlias": "github_api",
-    "isNewFlag": "FALSE"
+    "isNewFlag": "TRUE"
 }

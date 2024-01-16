@@ -1,5 +1,5 @@
 {
-    "name": "New API through GitHub",
+    "name": "Update API through GitHub",
     "openAPISpecificationFileType": "yaml",
     "codeSampleSpecification": "https://raw.githubusercontent.com/magendirans/devportal-openapi-spec/main/codeSample.html",
     "productNameinApigee": "",
@@ -10,5 +10,5 @@
     "contactUsButtonURL": "https://exchange.se.com/",
     "manageSubscriptionURL": "https://exchange.se.com/",
     "urlAlias": "github_api",
-    "isNewFlag": "TRUE"
+    "isNewFlag": "FALSE"
 }

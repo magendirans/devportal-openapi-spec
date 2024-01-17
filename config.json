@@ -1,5 +1,5 @@
 {
-    "name": "API through GitHub",
+    "name": "APIDoc via GitHub",
     "openAPISpecificationFileType": "yaml",
     "codeSampleSpecification": "https://raw.githubusercontent.com/magendirans/devportal-openapi-spec/main/codeSample.html",
     "productNameinApigee": "",
@@ -9,6 +9,6 @@
     "contactUsButtonLabel": "Click",
     "contactUsButtonURL": "https://exchange.se.com/",
     "manageSubscriptionURL": "https://exchange.se.com/",
-    "urlAlias": "github_api",
+    "urlAlias": "github_test",
     "isNewFlag": "TRUE"
 }

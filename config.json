@@ -13,7 +13,7 @@
     "urlAlias": "github_test",
     "enablePAT": "FALSE",
     "enableEncodingForURLs" : "TRUE",
-    "rbacVisibility" : "public",
-    "rbacEmails" : "",
-    "rbacEmailDomains" : ""
+    "rbacVisibility" : "private",
+    "rbacEmails" : "magendiran.s@non.se.com,n-developer@yopmail.com,sogam53497@getmola.com",
+    "rbacEmailDomains" : "*@gmail.com,*@yopmail.com"
 }

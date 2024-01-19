@@ -1,5 +1,5 @@
 {
-    "isNewFlag": "TRUE",
+    "isNewFlag": "FALSE",
     "name": "APIDoc via GitHub",
     "openAPISpecificationFileType": "yaml",
     "codeSampleSpecification": "https://raw.githubusercontent.com/magendirans/devportal-openapi-spec/main/codeSample.html",

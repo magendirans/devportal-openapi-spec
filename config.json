@@ -10,5 +10,10 @@
     "contactUsButtonURL": "https://exchange.se.com/",
     "manageSubscriptionURL": "https://exchange.se.com/",
     "urlAlias": "github_test",
-    "isNewFlag": "TRUE"
+    "isNewFlag": "TRUE",
+    "enablePAT": "FALSE",
+    "enableEncodingForURLs" : "TRUE",
+    "rbacVisibility" : "public",
+    "rbacEmails" : "",
+    "rbacEmailDomains" : ""
 }

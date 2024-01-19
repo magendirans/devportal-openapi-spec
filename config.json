@@ -10,7 +10,7 @@
     "contactUsButtonLabel": "Click",
     "contactUsButtonURL": "https://exchange.se.com/",
     "manageSubscriptionURL": "https://exchange.se.com/",
-    "urlAlias": "github_test",
+    "urlAlias": "github_api",
     "enablePAT": "FALSE",
     "enableEncodingForURLs" : "TRUE",
     "rbacVisibility" : "private",

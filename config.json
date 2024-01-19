@@ -11,7 +11,7 @@
     "contactUsButtonURL": "https://exchange.se.com/",
     "manageSubscriptionURL": "https://exchange.se.com/",
     "urlAlias": "github_api",
-    "enablePAT": "FALSE",
+    "enablePAT": "TRUE",
     "enableEncodingForURLs" : "TRUE",
     "rbacVisibility" : "private",
     "rbacEmails" : "magendiran.s@non.se.com,n-developer@yopmail.com,sogam53497@getmola.com",

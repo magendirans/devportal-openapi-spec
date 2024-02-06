@@ -1,9 +1,26 @@
 {
-    "entryPoint": "./release/api_products/asset-advisor/eaa-v1.yaml",
-    "outputPath": "/release/api_products/apidoc_specs/",
-    "devportalurlAlias": "new-asset-advisor",
-    "redoclyRepo": "@se/asset-advisor@v1",
-    "branch": "asset-advisor",
+    "Variables": [
+        {
+            "Name": "entryPoint",
+            "Value": "./release/api_products/asset-advisor/eaa-v1.yaml"
+        },
+        {
+            "Name": "outputPath",
+            "Value": "/release/api_products/apidoc_specs/"
+        },
+        {
+            "Name": "devportalurlAlias",
+            "Value": "new-asset-advisor"
+        },
+        {
+            "Name": "redoclyRepo",
+            "Value": "@se/asset-advisor@v1"
+        },
+        {
+            "Name": "branch",
+            "Value": "asset-advisor"
+        }
+    ],
     "isNewFlag": "FALSE",
     "name": "APIDoc via GitHub",
     "openAPISpecificationFileType": "yaml",

@@ -1,5 +1,10 @@
 {
-    "isNewFlag": "TRUE",
+    "entryPoint": "./release/api_products/asset-advisor/eaa-v1.yaml",
+    "outputPath": "/release/api_products/apidoc_specs/",
+    "devportalurlAlias": "new-asset-advisor",
+    "redoclyRepo": "@se/asset-advisor@v1",
+    "branch": "asset-advisor",
+    "isNewFlag": "FALSE",
     "name": "APIDoc via GitHub",
     "openAPISpecificationFileType": "yaml",
     "codeSampleSpecification": "https://raw.githubusercontent.com/magendirans/devportal-openapi-spec/main/codeSample.html",
@@ -12,8 +17,8 @@
     "manageSubscriptionURL": "https://exchange.se.com/",
     "urlAlias": "github_api",
     "enablePAT": "FALSE",
-    "enableEncodingForURLs" : "TRUE",
-    "rbacVisibility" : "public",
-    "rbacEmails" : "",
-    "rbacEmailDomains" : ""
+    "enableEncodingForURLs": "TRUE",
+    "rbacVisibility": "public",
+    "rbacEmails": "",
+    "rbacEmailDomains": ""
 }

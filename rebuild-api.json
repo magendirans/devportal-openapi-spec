@@ -1,0 +1,3367 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "EcoStruxure™ Asset Advisor data API",
+    "description": "# Overview\nEcoStruxure™ Asset Advisor data API allows customers to collect and manage status and health of critical assets in electrical distribution networks.\n\nThis API is available as an optional module of EcoStruxure™ Asset Advisor for Electrical Distribution. For more information please contact us.\n\n## API overview and usage\nThis API enables the following operations:\n\n**Sites and Assets**\n- Browse and discover sites and assets information.\n- Provide sites and assets specific details (e.g. risk level, health indexes).\n\n**Tickets**\n- Access all tickets generated on all assets from all sites.\n- Access all tickets for a given asset of a site.\n- Provide tickets specific details.\n\n**Webhook Subscriptions**\n- Get notifications on ticket changes.\n- Get notifications on asset health index changes.\n- Get notifications on site risk level changes.\n\n## How it works\nThis API works for any Schneider Electric customer who has an identity in the Schneider Electric cIAM system. Nevertheless, customers must subscribe to this API to use it. The current version of the API is including the operations that are described below.\n\n### Explore Sites\nThis set of APIs allows customers to browse all their Sites registered in Asset Advisor.\n\nIt is possible to access basic information of each site, such as ID, name, address, and location, which allows customers to do a mapping of Asset Advisor sites with their own representation and IDs, and also to locate all Sites in a map.\n\nWith the detailed view of a Site, customers are able to access information such as the Service Level subscribed for the Site, the Global Risk Level of the Site and the Health Matrix of the Site (including criticality and health index).\n\n### Explore Assets\nThis set of APIs allows customers to browse all Assets for a specific Site registered in Asset Advisor.\n\nIt is possible to have two different views of the Assets within a given Site. The first one is the List View, providing a standard list of assets for a given Site, including asset information such as ID, name, description, type, and criticality. The second view is a Tree View, providing the entire hierarchy of assets for a given Site, allowing customers to build a complete Site topology.\n\nFinally, it is possible to get specific details of each Asset, including the health index, maintenance information, and many other technical details. \n\n### Access Tickets\nThis set of APIs allows customers to retrieve all tickets in Asset Advisor, including both alarms and recommendations. These tickets are either triggered by the Asset Advisor Analytics modules or manually created by Schneider Electric experts. This information allows customers to create their own customized dashboards with all tickets from their electrical distribution networks.\n\nIt is possible to query tickets using some filters such as:\n\n- Date range (ticket creation date)\n\n- Status (e.g. only \"Opened\" tickets)\n\n- Priority (e.g. Only \"High\" priority tickets)\n\nBesides the above filters, it's also possible to limit the number of tickets in the response or retrieving specific range of tickets by setting the offset & limit filters for pagination capability. These queries return a list of \"light\" tickets, providing basic information such as title, description, asset, site, priority, status and creation date.\n\nIt is also possible to retrieve all tickets for a particular Asset of a Site, with similar filtering and pagination capabilities. This allows customers to create a consolidated view of tickets for a particular Asset of a Site.\n\nFinally, it is possible to get specific details of each Ticket, including information such as priority, status, creation date, history of changes, comments and attachments. This allows customers to create a detailed view of each ticket.\n\n### Webhook Subscriptions\nThis set of APIs allows customers to manage event notifications through *webhook subscriptions*. The customer will be able to register/update/remove a subscription, list available subscriptions, and get details of a given subscription. The webhook subscriptions will provide notifications to customers based on some topics.\n\nCurrently, the topics concerning are:\n\n**Ticket**\n- Notified on any ticket modification. \n- Currenlty, notification are sent when the ticket *\"priority\"* has changed or when an *\"activity\"* has been performed on the ticket (e.g. close the ticket).\n- Set *\"All\"* for both *priority* and *activity* filters during subscription to get notified for all ticket events.\n\n**Asset Health**\n- Notified when the asset health changed.\n- *\"healthIndexThreshold\"* is a mandatory filter to create a subscription and get notified only when the asset health value has changed with a value equals or above this threshold.\n- *\"sitesScope\"* is an optional filter to restrict the notification to a particular list of Site IDs.\n\n**Site Risk Level**\n- Notified when the site global risk level changed.\n- *\"riskLevelThreshold\"* is a mandatory filter to create a subscription and get notified only when the site risk level value has changed with a value equals or above this threshold.\n- *\"sitesScope\"* is an optional filter to restrict the notification to a particular list of Site IDs.\n\nFor all topics explained above, customers must provide a callback URL to receive the event notifications. When any event matching a webhook subscription is available, the callback URL will be notified with a call from Asset Advisor.\n\nThe callback URL must meet the following requirements for the event notification to properly arrive:\n- Must be reachable over the internet.\n- Its domain name must be resolvable by DNS service over the internet.\n- Its domain name must have a valid certificate.\n\nFor all topics, the message format sent to the callback URL is the following:\n```json\n{\n    \"topic\": \"{topicName}\", // enum {Ticket, AssetHealth, SiteRiskLevel}\n    \"id\": \"{topic id string}\", // \"guid\" of the Ticket, Asset, or Site\n    \"siteId\": \"string\", // \"guid\" of the Site\n    \"assetId\": \"string\", // \"guid\" of the Asset\n    \"timestamp\" : \"string\", // ISO 8601 format, \"2023-02-08T17:09:44+00:00\"        \n    \"events\": [\n\t\t{\n\t\t\t\"key\": \"{event property name}\", \n\t\t\t\"oldValue\": \"{Previous value if possible}\",\n\t\t\t\"newValue\": \"{New Value}\"\n\t\t}\n      ]    \n}\n```\n\n# Documentation\n\n## How to sign up\nThe current version of the API does not allow subscriptions on demand.\n\nSelected customers will be signed up manually, based on specific agreements with Schneider Electric, and will be able to access the API with the following information:\n\n**Step 1:** Receive the Exchange URL access for the API product.\n\n**Step 2:** [Register or login](https://exchange.se.com) with an Exchange account.\n\n**Step 3:** Generate a Personal Access Token (PAT) in the developer portal (API credentials and usage details are also available).\n\n## Code Sample\n\nYou can leverage the following code samples to integrate the API faster in your application:\n\n<div id=\"gitsample\"></div>\n\n## Support\n\nContact the SE Exchange support team at exchange.support@se.com and include:\n\n    - Endpoint URL\n    - Request/Response of the URL\n    - Any additional information like Screenshots, Postman collections, etc.\n\n---\nVisit <a href=\"https://community.se.com/t5/EcoStruxure-Asset-Advisor-Forum/bd-p/ecostruxure-asset-advisor-forum\" target=\"_blank\">the community</a> to discover related discussions and questions.\n",
+    "contact": {
+      "name": "Schneider Electric",
+      "url": "exchange.se.com",
+      "email": "exchange.support@se.com"
+    },
+    "license": {
+      "name": "Schneider Electric",
+      "url": "exchange.se.com"
+    },
+    "version": "1.2.0"
+  },
+  "servers": [
+    {
+      "url": "https://se-exchange-uat-uat.apigee.net/ecostruxure/asset-advisor/v1",
+      "description": "UAT"
+    }
+  ],
+  "security": [
+    {
+      "PersonalAccessToken": [
+        "read:site",
+        "read:asset",
+        "read:ticket",
+        "read:subscription",
+        "write:subscription"
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Asset Health Webhook Subscription",
+      "description": "Asset Health Webhook Subscription used to be notified on callback URL about an asset health value above or equal to a threshold"
+    },
+    {
+      "name": "Assets",
+      "description": "Browse and discover assets information."
+    },
+    {
+      "name": "Site Risk Level Webhook Subscription",
+      "description": "Site Risk Level Webhook Subscription used to be notified on callback URL about a site risk level above or equal to a threshold"
+    },
+    {
+      "name": "Sites",
+      "description": "Browse and discover sites information."
+    },
+    {
+      "name": "Ticket Webhook Subscription",
+      "description": "Ticket Webhook Subscription used to be notified on callback URL about modification done on ticket priority or activity performed on a ticket"
+    },
+    {
+      "name": "Tickets",
+      "description": "Access tickets generated on assets from your sites."
+    }
+  ],
+  "paths": {
+    "/sites": {
+      "get": {
+        "tags": [
+          "Sites"
+        ],
+        "summary": "Sites list",
+        "description": "List all your Sites registered in Asset Advisor, including basic information such as ID, name, address, and location.",
+        "operationId": "getSites",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sites"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:site"
+            ]
+          }
+        ]
+      }
+    },
+    "/sites/{siteId}": {
+      "get": {
+        "tags": [
+          "Sites"
+        ],
+        "summary": "Site details",
+        "description": "Get all details of a particular Site, including information such as service & risk levels, support contacts, and health matrix.",
+        "operationId": "getSiteDetails",
+        "parameters": [
+          {
+            "name": "siteId",
+            "description": "ID of the Site",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteFull"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:site"
+            ]
+          }
+        ]
+      }
+    },
+    "/sites/{siteId}/assets": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:asset"
+            ]
+          }
+        ],
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Assets list",
+        "description": "List all Assets for a particular Site, including basic information such as ID, name, description, type and criticality.",
+        "operationId": "getAssets",
+        "parameters": [
+          {
+            "description": "ID of the Site",
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assets"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sites/{siteId}/assets/treeview": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:asset"
+            ]
+          }
+        ],
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Assets Tree View",
+        "description": "Give the Assets tree view for a particular Site, including the complete relationships between all assets.",
+        "operationId": "getAssetsTree",
+        "parameters": [
+          {
+            "description": "ID of the Site",
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetsTreeElt"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sites/{siteId}/assets/{assetId}": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:asset"
+            ]
+          }
+        ],
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Asset details",
+        "description": "Get details of a particular Asset within a Site, including information such as service level, maintenance & health indexes.",
+        "operationId": "getAssetDetails",
+        "parameters": [
+          {
+            "description": "ID of the Site",
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "ID of the Asset",
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetFull"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tickets": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:ticket"
+            ]
+          }
+        ],
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Tickets list",
+        "description": "List all Tickets for all Assets and Sites, with different query criteria (date, status, priority) and pagination capability. The current sort criteria used for the tickets is the creation date in descending order.",
+        "operationId": "getTickets",
+        "parameters": [
+          {
+            "name": "createdFrom",
+            "description": "Allow to filter on particular CreationDate range (default to last 30 days)",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdTo",
+            "description": "Allow to filter on particular CreationDate range (default to last 30 days)",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "status",
+            "description": "Allow to filter on particular Status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TicketStatusEnum"
+              }
+            },
+            "style": "form",
+            "explode": false
+          },
+          {
+            "name": "priority",
+            "description": "Allow to filter on particular Priority",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TicketPriorityEnum"
+              }
+            },
+            "style": "form",
+            "explode": false
+          },
+          {
+            "$ref": "#/components/parameters/offsetParam"
+          },
+          {
+            "$ref": "#/components/parameters/limitParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tickets"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sites/{siteId}/assets/{assetId}/tickets": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:ticket"
+            ]
+          }
+        ],
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Assets Tickets",
+        "description": "List all Tickets of a particular Asset within a Site, with the abilitiy to filter by status and pagination capability. The current sort criteria used for the tickets is the creation date in descending order.",
+        "operationId": "getAssetsTickets",
+        "parameters": [
+          {
+            "description": "ID of the Site",
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "ID of the Asset",
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "Allow to filter on particular Status",
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TicketStatusEnum"
+              }
+            },
+            "style": "form",
+            "explode": false
+          },
+          {
+            "$ref": "#/components/parameters/offsetParam"
+          },
+          {
+            "$ref": "#/components/parameters/limitParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tickets"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tickets/{ticketId}": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:ticket"
+            ]
+          }
+        ],
+        "tags": [
+          "Tickets"
+        ],
+        "summary": "Ticket details",
+        "description": "Get details of a particular Ticket, including the history of what happened on the ticket.",
+        "operationId": "getTicketDetails",
+        "parameters": [
+          {
+            "description": "ID of the Ticket",
+            "name": "ticketId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketFull"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/subscriptions/ticket": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Ticket Webhook Subscription"
+        ],
+        "summary": "List ticket subscriptions",
+        "description": "Retrieve all ticket subscriptions currently set",
+        "operationId": "getTicketSubscriptionList",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "title": "List of Ticket supscription",
+                  "description": "List of Ticket supscription",
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SubscriptionConfig"
+                      },
+                      {
+                        "$ref": "#/components/schemas/TicketSubscriptionConfig"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "write:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Ticket Webhook Subscription"
+        ],
+        "summary": "Create ticket subscription",
+        "description": "Register a new ticket subscription",
+        "operationId": "postTicketSubscription",
+        "requestBody": {
+          "description": "Ticket subscription",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketSubscriptionConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "supscription",
+                  "description": "supscription",
+                  "properties": {
+                    "id": {
+                      "title": "Subscription id",
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "5ba38c20-0b86-495f-a470-efb1bb6f8b1e"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/subscriptions/ticket/{subscriptionId}": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Ticket Webhook Subscription"
+        ],
+        "summary": "Get details of ticket subscription",
+        "description": "Retrieve details of a ticket subscription",
+        "operationId": "getTicketSubscription",
+        "parameters": [
+          {
+            "description": "Id of the ticket subscription",
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SubscriptionConfig"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TicketSubscriptionConfig"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "write:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Ticket Webhook Subscription"
+        ],
+        "summary": "Update ticket subscription",
+        "description": "Update a ticket subscription",
+        "operationId": "putTicketSubscription",
+        "parameters": [
+          {
+            "description": "Id of the ticket subscription",
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Ticket subscription",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketSubscriptionConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SubscriptionConfig"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TicketSubscriptionConfig"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "write:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Ticket Webhook Subscription"
+        ],
+        "summary": "Delete ticket subscription",
+        "description": "Delete a ticket subscription",
+        "operationId": "deleteTicketSubscription",
+        "parameters": [
+          {
+            "description": "Id of the ticket subscription",
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/subscriptions/assethealth": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Asset Health Webhook Subscription"
+        ],
+        "summary": "List asset health subscriptions",
+        "description": "Retrieve all asset health subscriptions currently set",
+        "operationId": "getAssetHealthSubscriptionList",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "title": "List of asset health supscription",
+                  "description": "List of asset health supscription",
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SubscriptionConfig"
+                      },
+                      {
+                        "$ref": "#/components/schemas/AssetHealthSubscriptionConfig"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "write:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Asset Health Webhook Subscription"
+        ],
+        "summary": "Create asset health subscription",
+        "description": "Register a new asset health subscription",
+        "operationId": "postAssetHealthSubscription",
+        "requestBody": {
+          "description": "Asset health  subscription",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetHealthSubscriptionConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "supscription",
+                  "description": "supscription",
+                  "properties": {
+                    "id": {
+                      "title": "Subscription id",
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "5ba38c20-0b86-495f-a470-efb1bb6f8b1e"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/subscriptions/assethealth/{subscriptionId}": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Asset Health Webhook Subscription"
+        ],
+        "summary": "Get details of asset health subscription",
+        "description": "Retrieve details of an asset health subscription",
+        "operationId": "getAssetHealthSubscription",
+        "parameters": [
+          {
+            "description": "Id of the asset health subscription",
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SubscriptionConfig"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AssetHealthSubscriptionConfig"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "write:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Asset Health Webhook Subscription"
+        ],
+        "summary": "Update asset health subscription",
+        "description": "Update an asset health subscription",
+        "operationId": "putAssetHealthSubscription",
+        "parameters": [
+          {
+            "description": "Id of the asset health subscription",
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "asset health subscription",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetHealthSubscriptionConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SubscriptionConfig"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AssetHealthSubscriptionConfig"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "write:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Asset Health Webhook Subscription"
+        ],
+        "summary": "Delete asset health subscription",
+        "description": "Delete an asset health subscription",
+        "operationId": "deleteAssetHealthSubscription",
+        "parameters": [
+          {
+            "description": "Id of the asset health subscription",
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/subscriptions/siterisklevel": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Site Risk Level Webhook Subscription"
+        ],
+        "summary": "List site risk level subscriptions",
+        "description": "Retrieve all site risk level subscriptions currently set",
+        "operationId": "getSiteRiskLevelSubscriptionList",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "title": "List of Ticket supscription",
+                  "description": "List of Ticket supscription",
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/SubscriptionConfig"
+                      },
+                      {
+                        "$ref": "#/components/schemas/SiteRiskLevelSubscriptionConfig"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "write:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Site Risk Level Webhook Subscription"
+        ],
+        "summary": "Create site risk level subscription",
+        "description": "Register a new site risk level subscription",
+        "operationId": "postSiteRiskLevelSubscription",
+        "requestBody": {
+          "description": "Site risk level  subscription",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteRiskLevelSubscriptionConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "supscription",
+                  "description": "supscription",
+                  "properties": {
+                    "id": {
+                      "title": "Subscription id",
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "5ba38c20-0b86-495f-a470-efb1bb6f8b1e"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhooks/subscriptions/siterisklevel/{subscriptionId}": {
+      "get": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "read:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Site Risk Level Webhook Subscription"
+        ],
+        "summary": "Get details of site risk level subscription",
+        "description": "Retrieve details of a site risk level subscription",
+        "operationId": "getSiteRiskLevelSubscription",
+        "parameters": [
+          {
+            "description": "Id of the site risk level subscription",
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SubscriptionConfig"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SiteRiskLevelSubscriptionConfig"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error404"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "write:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Site Risk Level Webhook Subscription"
+        ],
+        "summary": "Update site risk level subscription",
+        "description": "Update a site risk level subscription",
+        "operationId": "putSiteRiskLevelSubscription",
+        "parameters": [
+          {
+            "description": "Id of the site risk level subscription",
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "site risk level subscription",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteRiskLevelSubscriptionConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SubscriptionConfig"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SiteRiskLevelSubscriptionConfig"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "PersonalAccessToken": [
+              "write:subscription"
+            ]
+          }
+        ],
+        "tags": [
+          "Site Risk Level Webhook Subscription"
+        ],
+        "summary": "Delete site risk level subscription",
+        "description": "Delete a site risk level subscription",
+        "operationId": "deleteSiteRiskLevelSubscription",
+        "parameters": [
+          {
+            "description": "Id of the site risk level subscription",
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error403"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error500"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "ticket-webhook": {
+      "post": {
+        "summary": "Ticket Webhook Events",
+        "description": "Ticket Webhook Events",
+        "operationId": "ticketWebhook",
+        "tags": [
+          "Ticket Webhook Subscription"
+        ],
+        "requestBody": {
+          "description": "Ticket Webhook",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketWebhook"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": []
+      }
+    },
+    "asset-health-webhook": {
+      "post": {
+        "summary": "Asset Health Webhook Events",
+        "description": "Asset Health Webhook Events",
+        "operationId": "assetHealthWebhook",
+        "tags": [
+          "Asset Health Webhook Subscription"
+        ],
+        "requestBody": {
+          "description": "Asset Health Webhook",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetHealthWebhook"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": []
+      }
+    },
+    "site-risk-webhook": {
+      "post": {
+        "summary": "Site Risk Level Webhook Events",
+        "description": "Site Risk Level Events",
+        "operationId": "siteRiskWebhook",
+        "tags": [
+          "Site Risk Level Webhook Subscription"
+        ],
+        "requestBody": {
+          "description": "Site Risk Webhook",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteRiskWebhook"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "PersonalAccessToken": {
+        "type": "http",
+        "description": "Personal access token based authentication and authorization. Use https://exchange.se.com/devportal to generate and manage personal access tokens.",
+        "scheme": "bearer"
+      }
+    },
+    "parameters": {
+      "offsetParam": {
+        "in": "query",
+        "name": "offset",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "description": "The number of items to skip before starting to collect the result set."
+      },
+      "limitParam": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 50
+        },
+        "description": "The numbers of items to return."
+      }
+    },
+    "schemas": {
+      "Sites": {
+        "title": "Sites",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Site"
+        },
+        "description": "List of Sites"
+      },
+      "TicketWebhook": {
+        "title": "Ticket Webhook",
+        "type": "object",
+        "properties": {
+          "topic": {
+            "title": "Topic Name",
+            "type": "string",
+            "enum": [
+              "Ticket"
+            ],
+            "example": "Ticket"
+          },
+          "id": {
+            "title": "Guid of the ticket",
+            "type": "string",
+            "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+          },
+          "siteId": {
+            "title": "Guid of Site",
+            "type": "string",
+            "example": "2fa38c20-0b86-495f-a470-efb1bb6f8b1b"
+          },
+          "assetId": {
+            "title": "Guid of asset",
+            "type": "string",
+            "example": "3fa38c20-0b86-495f-a470-efb1bb6f8b1c"
+          },
+          "timestamp": {
+            "title": "ISO 8601 format",
+            "type": "string",
+            "example": "2023-02-08T17:09:44+00:00"
+          },
+          "events": {
+            "title": "events",
+            "type": "array",
+            "description": "Depending on what changed in the ticket, it can have 1 or 2 events",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "title": "Event property name",
+                  "enum": [
+                    "Priority",
+                    "Status"
+                  ],
+                  "example": "Priority"
+                },
+                "oldValue": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PriorityValue"
+                    },
+                    {
+                      "$ref": "#/components/schemas/StatusValue"
+                    }
+                  ]
+                },
+                "newValue": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/PriorityValue"
+                    },
+                    {
+                      "$ref": "#/components/schemas/StatusValue"
+                    }
+                  ]
+                }
+              }
+            },
+            "example": [
+              {
+                "key": "Priority",
+                "oldValue": "Medium",
+                "newValue": "High"
+              },
+              {
+                "key": "Status",
+                "oldValue": "Opened",
+                "newValue": "InProgress"
+              }
+            ]
+          }
+        }
+      },
+      "SiteRiskWebhook": {
+        "title": "Site Risk Webhook",
+        "type": "object",
+        "properties": {
+          "topic": {
+            "title": "Topic Name",
+            "type": "string",
+            "enum": [
+              "SiteRiskLevel"
+            ],
+            "example": "SiteRiskLevel"
+          },
+          "id": {
+            "title": "Guid of the site",
+            "type": "string",
+            "example": "2fa38c20-0b86-495f-a470-efb1bb6f8b1b"
+          },
+          "siteId": {
+            "title": "Guid of site",
+            "type": "string",
+            "example": "2fa38c20-0b86-495f-a470-efb1bb6f8b1b"
+          },
+          "assetId": {
+            "title": "Guid of asset",
+            "type": "string",
+            "example": "3fa38c20-0b86-495f-a470-efb1bb6f8b1c"
+          },
+          "timestamp": {
+            "title": "ISO 8601 format",
+            "type": "string",
+            "example": "2023-02-08T17:09:44+00:00"
+          },
+          "events": {
+            "title": "events",
+            "type": "array",
+            "description": "It will always have 1 event",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "title": "Event property name",
+                  "enum": [
+                    "RiskLevel"
+                  ],
+                  "example": "RiskLevel"
+                },
+                "oldValue": {
+                  "type": "string",
+                  "title": "Previous value of the property. It is a percentage.",
+                  "example": "10",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "newValue": {
+                  "type": "string",
+                  "title": "New value of the property. It is a percentage.",
+                  "example": "70",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              }
+            }
+          }
+        }
+      },
+      "AssetHealthWebhook": {
+        "title": "Asset Health Webhook",
+        "type": "object",
+        "properties": {
+          "topic": {
+            "title": "Topic Name",
+            "type": "string",
+            "enum": [
+              "AssetHealth"
+            ],
+            "example": "AssetHealth"
+          },
+          "id": {
+            "title": "Guid of the asset",
+            "type": "string",
+            "example": "3fa38c20-0b86-495f-a470-efb1bb6f8b1c"
+          },
+          "siteId": {
+            "title": "Guid of Site",
+            "type": "string",
+            "example": "2fa38c20-0b86-495f-a470-efb1bb6f8b1b"
+          },
+          "assetId": {
+            "title": "Guid of asset",
+            "type": "string",
+            "example": "3fa38c20-0b86-495f-a470-efb1bb6f8b1c"
+          },
+          "timestamp": {
+            "title": "ISO 8601 format",
+            "type": "string",
+            "example": "2023-02-08T17:09:44+00:00"
+          },
+          "events": {
+            "title": "events",
+            "type": "array",
+            "description": "It will always have 1 event",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "title": "Event property name",
+                  "enum": [
+                    "HealthIndex"
+                  ],
+                  "example": "HealthIndex"
+                },
+                "oldValue": {
+                  "type": "string",
+                  "title": "Previous value of the property",
+                  "enum": [
+                    "NONE",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  "example": "1"
+                },
+                "newValue": {
+                  "type": "string",
+                  "title": "New value of the property",
+                  "enum": [
+                    "NONE",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  "example": "2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PriorityValue": {
+        "type": "string",
+        "enum": [
+          "High",
+          "Medium",
+          "Low",
+          "Info",
+          "NONE"
+        ]
+      },
+      "StatusValue": {
+        "type": "string",
+        "enum": [
+          "Opened",
+          "InProgress",
+          "Closed",
+          "NONE"
+        ]
+      },
+      "Site": {
+        "title": "Site",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Asset Advisor Site ID",
+            "type": "string",
+            "format": "uuid",
+            "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+          },
+          "name": {
+            "title": "Site Name",
+            "type": "string",
+            "example": "Headquarters"
+          },
+          "country": {
+            "title": "Site Country",
+            "type": "string",
+            "example": "Some Country"
+          },
+          "city": {
+            "title": "Site City",
+            "type": "string",
+            "example": "Some city"
+          },
+          "address": {
+            "title": "Site Address",
+            "type": "string",
+            "example": "Full Address of site"
+          },
+          "zipCode": {
+            "title": "ZipCode",
+            "type": "string",
+            "example": "90210"
+          },
+          "timeZone": {
+            "title": "Timezone of the Site",
+            "type": "string",
+            "example": "CST"
+          },
+          "latitude": {
+            "title": "Site coordinates",
+            "type": "number",
+            "example": 45.1234
+          },
+          "longitude": {
+            "title": "Site coordinates",
+            "type": "number",
+            "example": -3.1234
+          }
+        }
+      },
+      "SiteFull": {
+        "title": "SiteFull",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Site"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "goLiveDate": {
+                "title": "Site commissioning date",
+                "type": "string",
+                "format": "date",
+                "description": "Creation date of the Site in Asset Advisor",
+                "example": "2022-08-24"
+              },
+              "description": {
+                "title": "Site description",
+                "type": "string",
+                "description": "User level description",
+                "example": "This is the site description"
+              },
+              "serviceLevel": {
+                "title": "Site Service Level",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ServiceLevelsEnum"
+                  }
+                ],
+                "description": "Gives what Service Level was subscribed for the Site",
+                "example": "EAA Predictive"
+              },
+              "riskLevel": {
+                "title": "Site Global Risk Level",
+                "type": "number",
+                "description": "Last computation of Site's Global Risk Level",
+                "example": 30
+              },
+              "supportContacts": {
+                "title": "Site contacts",
+                "description": "List of support Contacts for the Site",
+                "required": [
+                  "Name",
+                  "Email",
+                  "Phone"
+                ],
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "title": "Contact Name",
+                      "type": "string",
+                      "example": "Bob Clark"
+                    },
+                    "email": {
+                      "title": "Contact mail",
+                      "type": "string",
+                      "example": "bob.clark@comp.com"
+                    },
+                    "phone": {
+                      "title": "Contact phone",
+                      "type": "string",
+                      "example": "+1 832 123-4567"
+                    }
+                  }
+                }
+              },
+              "healthMatrix": {
+                "$ref": "#/components/schemas/HealthMatrix"
+              },
+              "communicationStatus": {
+                "title": "Gateways Communication Status",
+                "description": "Provide Communication Status per Gateway",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "gwId": {
+                      "title": "Gateway ID",
+                      "type": "string",
+                      "format": "uuid",
+                      "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+                    },
+                    "name": {
+                      "title": "Gateway Name",
+                      "type": "string",
+                      "example": "Main Gateway"
+                    },
+                    "functionalName": {
+                      "title": "Gateway functional Name",
+                      "type": "string",
+                      "example": "GW-001"
+                    },
+                    "communicationStatus": {
+                      "title": "Communication Status",
+                      "description": "True means OK",
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "receptionDate": {
+                      "title": "Last Reception Date",
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2022-10-15"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "HealthMatrix": {
+        "title": "Health Matrix Cell",
+        "description": "Matrix of 3 X 5 Assets Health Indexes",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/HealthIndexElt"
+        }
+      },
+      "HealthIndexElt": {
+        "type": "object",
+        "properties": {
+          "criticality": {
+            "title": "Cell Criticality",
+            "description": "Criticality of the Cell",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3,
+            "example": 2
+          },
+          "healthIndex": {
+            "title": "Cell HealthIndex",
+            "description": "Health Index of the Cell",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 2
+          },
+          "nbAsset": {
+            "title": "Cell Assets Nb",
+            "description": "Number of Assets in current Cell",
+            "type": "integer",
+            "example": 8
+          }
+        }
+      },
+      "ServiceLevelsEnum": {
+        "title": "ServiceLevelsEnum",
+        "enum": [
+          "EAA Predictive",
+          "EAA Preventive",
+          "EcoCare Advanced",
+          "EcoCare+ Advanced",
+          "EcoCare Essential",
+          "ESP Electric fire prevention",
+          "ESP Plus",
+          "ESP Power & Asset management",
+          "ESP Predict",
+          "ESP Prevent",
+          "ESP Prime"
+        ],
+        "type": "string"
+      },
+      "Asset": {
+        "title": "Asset",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Asset Advisor ID",
+            "type": "string",
+            "format": "uuid",
+            "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+          },
+          "name": {
+            "title": "Asset Name",
+            "type": "string",
+            "description": "Name of the Asset",
+            "example": "Main LV Breaker"
+          },
+          "description": {
+            "title": "Asset Description",
+            "type": "string",
+            "example": "Used to protect main area"
+          },
+          "functionalName": {
+            "title": "Asset Functional Name",
+            "type": "string",
+            "example": "MVCB-Main - 001"
+          },
+          "serialNumber": {
+            "title": "Asset Serial Number",
+            "type": "string",
+            "example": "X-123-456-789"
+          },
+          "type": {
+            "title": "Asset Type",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssetTypesEnum"
+              }
+            ],
+            "example": "MVCircuitBreaker"
+          },
+          "criticality": {
+            "title": "Asset Criticality in the process, 1 is lower",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3,
+            "example": 1
+          }
+        }
+      },
+      "AssetFull": {
+        "title": "Asset Full",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Asset"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "commissioningDate": {
+                "title": "Commissioning Date of the Asset in Asset Advisor",
+                "type": "string",
+                "format": "date",
+                "example": "2019-01-15"
+              },
+              "manufacturer": {
+                "title": "Manufacturer",
+                "type": "string",
+                "example": "Schneider Electric"
+              },
+              "range": {
+                "title": "Range",
+                "type": "string",
+                "example": "LF"
+              },
+              "deviceRangeName": {
+                "title": "Range Name ??",
+                "type": "string",
+                "example": "LF2"
+              },
+              "deviceShortName": {
+                "title": "Short Name ??",
+                "type": "string",
+                "example": "LF2 07 40 06"
+              },
+              "commercialReference": {
+                "title": "Commercial Reference",
+                "type": "string",
+                "example": "MC Set"
+              },
+              "ratedCurrent": {
+                "title": "Rated Current",
+                "type": "integer",
+                "example": 1250
+              },
+              "ratedVoltage": {
+                "title": "Rated Voltage",
+                "type": "integer",
+                "example": 25000
+              },
+              "serviceLevel": {
+                "title": "Asset Service Level",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ServiceLevelsEnum"
+                  }
+                ],
+                "description": "By default, the Asset Service Level is the same as the Site",
+                "example": "EAA Predictive"
+              },
+              "lastMaintenanceDate": {
+                "title": "Last Maintenance Date",
+                "type": "string",
+                "format": "date",
+                "example": "2020-01-20"
+              },
+              "nextMaintenanceDate": {
+                "title": "Next Maintenance Date",
+                "type": "string",
+                "format": "date",
+                "example": "2025-01-20"
+              },
+              "usageAndEnvironmentalLevel": {
+                "title": "Usage and Environmental Level",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UsageEnvironmentalLevelEnum"
+                  }
+                ]
+              },
+              "healthIndex": {
+                "title": "Current computed Health Index",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5,
+                "example": 1
+              },
+              "maintenanceIndex": {
+                "title": "Current computed Maintenance Index",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5,
+                "example": 2
+              },
+              "electricFireRiskPrevention": {
+                "title": "Electrical fire risk prevention data",
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "electricalFireRiskIndex": {
+                    "title": "Fire Risk index",
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 3,
+                    "example": 2
+                  },
+                  "electricalFireRiskConfidenceLevel": {
+                    "title": "Fire risk confidence level, as an index",
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 3,
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "AssetTypesEnum": {
+        "title": "AssetTypesEnum",
+        "enum": [
+          "ATV6000Cubicle",
+          "ATV6000Drivesystem",
+          "ATV6000Drive",
+          "ATV6000Fan",
+          "ATV6000Transformer",
+          "BatteryBank",
+          "Building",
+          "Container",
+          "Cooling",
+          "Drawer",
+          "Drive",
+          "DryTransformer",
+          "GenericAsset",
+          "Location",
+          "LVCircuitBreaker",
+          "LVCubicle",
+          "LVPanel",
+          "Motor",
+          "MVCircuitBreaker",
+          "MVCubicle",
+          "MVMotor",
+          "MVPanel",
+          "OilTransformer",
+          "PMSSystem",
+          "ProtectionRelay",
+          "Site",
+          "UPS"
+        ],
+        "type": "string"
+      },
+      "UsageEnvironmentalLevelEnum": {
+        "title": "UsageEnvironmentalLevelEnum",
+        "enum": [
+          "Normal",
+          "Severe"
+        ],
+        "type": "string"
+      },
+      "Assets": {
+        "title": "Assets",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Asset"
+        },
+        "description": "List of Assets"
+      },
+      "AssetsTreeElt": {
+        "title": "Asset Tree Element",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Asset"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "childrens": {
+                "title": "Childrens of the Asset",
+                "description": "Note: as of Sept 2022, recursive model cannot be rendered with OpenAPI tools. Same apply for generated samples.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AssetsTreeElt"
+                }
+              },
+              "parentId": {
+                "title": "Parent of the Asset",
+                "type": "string",
+                "format": "uuid",
+                "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+              }
+            }
+          }
+        ]
+      },
+      "TicketStatusEnum": {
+        "title": "TicketStatusEnum",
+        "enum": [
+          "Pending",
+          "Opened",
+          "InProgress",
+          "Closed"
+        ],
+        "type": "string"
+      },
+      "TicketPriorityEnum": {
+        "title": "Ticket Priorities",
+        "enum": [
+          "High",
+          "Medium",
+          "Low",
+          "Info"
+        ],
+        "type": "string"
+      },
+      "Ticket": {
+        "title": "Ticket",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Asset Advisor Ticket ID",
+            "type": "string",
+            "format": "uuid",
+            "description": "Internal ticket ID used in Asset Advisor application",
+            "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+          },
+          "clientTicketId": {
+            "title": "Id",
+            "type": "integer",
+            "description": "Ticket ID as seen in Asset Advisor application",
+            "example": 105394
+          },
+          "title": {
+            "title": "Ticket Title",
+            "type": "string",
+            "example": "Over Voltage on Asset 1B1 LV-MCC-001A"
+          },
+          "description": {
+            "title": "Ticket Description",
+            "type": "string",
+            "description": "Detailed description of the issue",
+            "example": "L3-L1 Over Voltage on Circuit Breaker 1B1 LV-MCC-001A. Threshold: 505 V, Value: 512.2 V"
+          },
+          "assetId": {
+            "title": "Asset Id",
+            "description": "The Asset this ticket is linked to",
+            "type": "string",
+            "format": "uuid",
+            "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+          },
+          "siteId": {
+            "title": "Site Id",
+            "description": "The Site this ticket is linked to",
+            "type": "string",
+            "format": "uuid",
+            "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+          },
+          "priority": {
+            "title": "Ticket Priority",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TicketPriorityEnum"
+              }
+            ]
+          },
+          "status": {
+            "title": "Ticket Status",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TicketStatusEnum"
+              }
+            ],
+            "description": "Current state of the Ticket in the processing workflow"
+          },
+          "creationDate": {
+            "title": "Ticket Creation Date",
+            "type": "string",
+            "format": "date-time",
+            "description": "This is the Creation Date into the system - Not the Issue Date",
+            "example": "2022-05-19T10:00:00Z"
+          }
+        }
+      },
+      "Tickets": {
+        "type": "object",
+        "properties": {
+          "tickets": {
+            "type": "array",
+            "title": "List of Tickets",
+            "description": "List of Tickets",
+            "items": {
+              "$ref": "#/components/schemas/Ticket"
+            }
+          },
+          "totalCount": {
+            "title": "totalCount",
+            "type": "integer",
+            "description": "Total ticket count",
+            "example": 2413
+          }
+        }
+      },
+      "TicketHistory": {
+        "title": "Ticket History",
+        "type": "object",
+        "properties": {
+          "activityType": {
+            "title": "Activity type",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TicketActivityEnum"
+              }
+            ],
+            "example": "CloseTicket"
+          },
+          "date": {
+            "title": "Date",
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-01-22T10:00:00Z"
+          },
+          "comment": {
+            "title": "User Comment",
+            "type": "string",
+            "description": "On some action, users can enter a free text comment",
+            "example": "Issue has been found"
+          },
+          "file": {
+            "title": "Attachment file",
+            "description": "Attachment, if available. Only the file name is provided at this release",
+            "type": "string",
+            "example": "FirePicture-05-21-2022.jpeg"
+          }
+        }
+      },
+      "TicketActivityEnum": {
+        "title": "Ticket Activity types",
+        "enum": [
+          "CreateTicket",
+          "OpenTicket",
+          "ValidateTicket",
+          "CloseTicket"
+        ],
+        "type": "string"
+      },
+      "TicketFull": {
+        "title": "TicketFull",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Ticket"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "customerMessage": {
+                "title": "Customermessage",
+                "type": "string",
+                "example": "Our expert is on this issue"
+              },
+              "condition": {
+                "title": "Current Condition",
+                "type": "boolean",
+                "description": "Current state of the underlying issue cause (active / inactive)",
+                "example": true
+              },
+              "crmCaseId": {
+                "title": "Crmcaseid",
+                "type": "string",
+                "example": "95144996"
+              },
+              "history": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TicketHistory"
+                },
+                "description": "History on what happened on the Ticket"
+              }
+            }
+          }
+        ]
+      },
+      "SubscriptionConfig": {
+        "title": "SubscriptionConfig",
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "Subscription id",
+            "type": "string",
+            "format": "uuid",
+            "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+          },
+          "creaedAt": {
+            "title": "creation data",
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-01-22T10:00:00Z"
+          },
+          "lastModifiedAt": {
+            "title": "update data",
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-02-18T11:00:00Z"
+          }
+        }
+      },
+      "TicketSubscriptionConfig": {
+        "title": "TicketSubscriptionConfig",
+        "type": "object",
+        "required": [
+          "callback",
+          "priority",
+          "activity"
+        ],
+        "properties": {
+          "callback": {
+            "title": "Callback url with apikey",
+            "type": "string",
+            "description": "callback url to be notified on modification",
+            "example": "https://example.com/samplewebhook/apiKey"
+          },
+          "priority": {
+            "title": "Ticket Priority",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "All",
+                "High",
+                "Medium",
+                "Low",
+                "Info"
+              ]
+            }
+          },
+          "activity": {
+            "title": "Ticket activity",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "All",
+                "OpenTicket",
+                "ValidateTicket",
+                "CloseTicket"
+              ]
+            }
+          }
+        }
+      },
+      "AssetHealthSubscriptionConfig": {
+        "title": "TicketSubscriptionConfig",
+        "type": "object",
+        "required": [
+          "callback",
+          "healthIndexThreshold"
+        ],
+        "properties": {
+          "callback": {
+            "title": "Callback url with apikey",
+            "type": "string",
+            "description": "callback url to be notified on modification",
+            "example": "https://example.com/samplewebhook/apiKey"
+          },
+          "healthIndexThreshold": {
+            "title": "Health index threshold",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Inclusive health index threshold",
+            "example": 3
+          },
+          "sitesScope": {
+            "title": "site list restriction",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+            }
+          }
+        }
+      },
+      "SiteRiskLevelSubscriptionConfig": {
+        "title": "TicketSubscriptionConfig",
+        "type": "object",
+        "required": [
+          "callback",
+          "riskLevelThreshold"
+        ],
+        "properties": {
+          "callback": {
+            "title": "Callback url with apikey",
+            "type": "string",
+            "description": "callback url to be notified on modification",
+            "example": "https://example.com/samplewebhook/apiKey"
+          },
+          "riskLevelThreshold": {
+            "title": "Site risk level threshold",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Inclusive site risk level threshold in percentage",
+            "example": 80
+          },
+          "sitesScope": {
+            "title": "site list restriction",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "example": "1fa38c20-0b86-495f-a470-efb1bb6f8b1e"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "type": "object",
+        "title": "Authorization error",
+        "description": "Error occurred while authorizing the request (based on rfc7807)",
+        "properties": {
+          "type": {
+            "description": "A URI reference [RFC3986] that identifies the problem type.",
+            "type": "string",
+            "format": "uri",
+            "example": "https://ecostructure-openapi.se.com/problem/unauthorized"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the problem type.",
+            "type": "string",
+            "example": "Unauthorized"
+          },
+          "status": {
+            "description": "The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.",
+            "type": "number",
+            "example": 401
+          },
+          "detail": {
+            "description": "A human-readable explanation specific to this occurrence of the problem.",
+            "type": "string",
+            "example": "Access Token expired"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Error403": {
+        "type": "object",
+        "title": "Forbidden",
+        "description": "Error occurred while authorizing the request (based on rfc7807)",
+        "properties": {
+          "type": {
+            "description": "A URI reference [RFC3986] that identifies the problem type.",
+            "type": "string",
+            "format": "uri",
+            "example": "https://ecostruxure-openapi.se.com/problem/access-forbidden"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the problem type.",
+            "type": "string",
+            "example": "Access Forbidden"
+          },
+          "status": {
+            "description": "The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.",
+            "type": "number",
+            "example": 403
+          },
+          "detail": {
+            "description": "A human-readable explanation specific to this occurrence of the problem.",
+            "type": "string",
+            "example": "User is not authorized to perform the action."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Error500": {
+        "type": "object",
+        "title": "Server Error",
+        "description": "Error occurred while processing the request",
+        "properties": {
+          "type": {
+            "description": "A URI reference [RFC3986] that identifies the problem type.",
+            "type": "string",
+            "format": "uri",
+            "example": "https://ecostruxure-openapi.se.com/problem/internal-server-error"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the problem type.",
+            "type": "string",
+            "example": "Internal Server Error"
+          },
+          "status": {
+            "description": "The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.",
+            "type": "number",
+            "example": 500
+          },
+          "detail": {
+            "description": "A human-readable explanation specific to this occurrence of the problem.",
+            "type": "string",
+            "example": "Something went wrong, please try again later."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Error404": {
+        "type": "object",
+        "title": "Not found error",
+        "description": "Error occurred while authorizing the request (based on rfc7807)",
+        "properties": {
+          "type": {
+            "description": "A URI reference [RFC3986] that identifies the problem type.",
+            "type": "string",
+            "format": "uri",
+            "example": "https://ecostructure-openapi.se.com/problem/not-found"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the problem type.",
+            "type": "string",
+            "example": "Not Found"
+          },
+          "status": {
+            "description": "The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.",
+            "type": "number",
+            "example": 404
+          },
+          "detail": {
+            "description": "A human-readable explanation specific to this occurrence of the problem.",
+            "type": "string",
+            "example": "Resource not found for provided identifier."
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Error400": {
+        "type": "object",
+        "title": "Validation error",
+        "description": "Error occurred while validating the request (based on rfc7807)",
+        "properties": {
+          "type": {
+            "description": "A URI reference [RFC3986] that identifies the problem type.",
+            "type": "string",
+            "format": "uri",
+            "example": "https://ecostructure-openapi.se.com/problem/validation-error"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the problem type.",
+            "type": "string",
+            "example": "Invalid Request"
+          },
+          "status": {
+            "description": "The HTTP status code ([RFC7231], Section 6) generated by the origin server for this occurrence of the problem.",
+            "type": "number",
+            "example": 400
+          },
+          "detail": {
+            "description": "A human-readable explanation specific to this occurrence of the problem.",
+            "type": "string",
+            "example": "Provided input request parameter is not valid."
+          },
+          "invalid-params": {
+            "description": "An array of validation errors.",
+            "type": "array",
+            "items": {
+              "description": "The validation error descriptor.",
+              "type": "object",
+              "required": [
+                "in",
+                "name",
+                "reason"
+              ],
+              "properties": {
+                "in": {
+                  "type": "string",
+                  "enum": [
+                    "path",
+                    "query",
+                    "header",
+                    "body"
+                  ],
+                  "example": "query"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "param1"
+                },
+                "reason": {
+                  "type": "string",
+                  "example": "param1 does not match the expected pattern."
+                }
+              },
+              "additionalProperties": false
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    }
+  },
+  "x-tagGroups": [
+    {
+      "name": "API specification",
+      "tags": [
+        "Sites",
+        "Assets",
+        "Tickets",
+        "Ticket Webhook Subscription",
+        "Asset Health Webhook Subscription",
+        "Site Risk Level Webhook Subscription"
+      ]
+    }
+  ]
+}
